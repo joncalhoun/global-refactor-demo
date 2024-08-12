@@ -1,7 +1,6 @@
 package tweet
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -22,7 +21,7 @@ func NewTweetHandler() http.HandlerFunc {
 	}
 }
 
-func ShowTweetHandler() http.HandlerFunc {
+func ShowTweetHandler(storage TweetStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := r.PathValue("id")
 		id, err := strconv.Atoi(idStr)
@@ -30,7 +29,7 @@ func ShowTweetHandler() http.HandlerFunc {
 			http.Error(w, "invalid tweet id", http.StatusBadRequest)
 			return
 		}
-		tweet, err := GetTweet(id)
+		tweet, err := storage.GetTweet(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -39,12 +38,12 @@ func ShowTweetHandler() http.HandlerFunc {
 	}
 }
 
-func CreateTweetHandler(db *sql.DB) http.HandlerFunc {
+func CreateTweetHandler(storage TweetStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		creatorID := 1 // In a real app we would get this from the session
 		content := r.Form.Get("content")
-		tweet, err := CreateTweet(db, creatorID, content)
+		tweet, err := storage.CreateTweet(creatorID, content)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
