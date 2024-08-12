@@ -1,6 +1,7 @@
 package tweet
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/joncalhoun/global-refactor-demo/psql"
@@ -12,7 +13,7 @@ type Tweet struct {
 	Content   string
 }
 
-func CreateTweet(creatorID int, content string) (*Tweet, error) {
+func CreateTweet(db *sql.DB, creatorID int, content string) (*Tweet, error) {
 	row := psql.DB.QueryRow(`
 		INSERT INTO tweets (creator_id, content)
 		VALUES ($1, $2)

@@ -1,6 +1,7 @@
 package tweet
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -38,14 +39,16 @@ func ShowTweetHandler() http.HandlerFunc {
 	}
 }
 
-func CreateTweetHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	creatorID := 1 // In a real app we would get this from the session
-	content := r.Form.Get("content")
-	tweet, err := CreateTweet(creatorID, content)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func CreateTweetHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		creatorID := 1 // In a real app we would get this from the session
+		content := r.Form.Get("content")
+		tweet, err := CreateTweet(db, creatorID, content)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(tweet)
 	}
-	json.NewEncoder(w).Encode(tweet)
 }
